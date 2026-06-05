@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "dev.sshtunnelexporter"
-version = "0.2.0" // x-release-please-version
+version = "0.3.0" // x-release-please-version
 
 /**
  * Render the plugin <change-notes> HTML from the latest CHANGELOG.md section (maintained by
