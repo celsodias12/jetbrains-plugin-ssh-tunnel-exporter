@@ -1,6 +1,7 @@
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
+import java.io.File
 
 plugins {
     id("java")
@@ -10,6 +11,43 @@ plugins {
 
 group = "dev.sshtunnelexporter"
 version = "0.2.0" // x-release-please-version
+
+/**
+ * Render the plugin <change-notes> HTML from the latest CHANGELOG.md section (maintained by
+ * release-please). Single source of truth — no hand-edited notes in plugin.xml. Returns null
+ * when there is nothing to render, leaving plugin.xml untouched.
+ */
+fun renderChangeNotes(changelog: File): String? {
+    if (!changelog.exists()) return null
+    val lines = changelog.readLines()
+    val header = lines.indexOfFirst { it.startsWith("## ") }
+    if (header < 0) return null
+    val after = lines.drop(header + 1)
+    val next = after.indexOfFirst { it.startsWith("## ") }
+    val body = if (next < 0) after else after.take(next)
+
+    fun inline(s: String): String = s
+        .replace(Regex("""\[([^]]+)]\(([^)]+)\)""")) { m -> "<a href=\"${m.groupValues[2]}\">${m.groupValues[1]}</a>" }
+        .replace(Regex("`([^`]+)`")) { m -> "<code>${m.groupValues[1]}</code>" }
+
+    val html = StringBuilder()
+    var inList = false
+    fun closeList() { if (inList) { html.append("</ul>"); inList = false } }
+    for (raw in body) {
+        val line = raw.trim()
+        when {
+            line.isEmpty() -> Unit
+            line.startsWith("### ") -> { closeList(); html.append("<p><b>${line.removePrefix("### ")}</b></p>") }
+            line.startsWith("* ") || line.startsWith("- ") -> {
+                if (!inList) { html.append("<ul>"); inList = true }
+                html.append("<li>${inline(line.drop(2))}</li>")
+            }
+            else -> { closeList(); html.append("<p>${inline(line)}</p>") }
+        }
+    }
+    closeList()
+    return html.toString().ifBlank { null }
+}
 
 repositories {
     mavenCentral()
@@ -27,6 +65,7 @@ dependencies {
 
 intellijPlatform {
     pluginConfiguration {
+        changeNotes = provider { renderChangeNotes(file("CHANGELOG.md")) }
         ideaVersion {
             sinceBuild = "231"
             untilBuild = provider { null } // open-ended: compatible with all newer builds

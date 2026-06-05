@@ -27,18 +27,7 @@
       <p>Works in DataGrip (and other JetBrains IDEs with the Database Tools &amp; SQL plugin).</p>
     ]]></description>
 
-    <change-notes><![CDATA[
-      <ul>
-        <li><b>0.3.0</b> &mdash; Add SSH option toggles (<code>-N</code>, <code>-f</code>, <code>-C</code>,
-            <code>-v</code>, <code>ConnectTimeout</code>, <code>IdentitiesOnly</code>, <code>ExitOnForwardFailure</code>,
-            and <code>ServerAliveInterval</code>/<code>ServerAliveCountMax</code> keep-alive), one-click copy of the
-            equivalent <code>~/.ssh/config</code> stanza with an editable host alias, a flow diagram, and a
-            copyable native-client connect command for known DBMS.</li>
-        <li><b>0.1.0</b> &mdash; Initial release: generate and copy the <code>ssh -L</code> tunnel
-            command for a data source, from the Database tool window or the Tools menu, with a
-            foreground/background toggle and an editable local port.</li>
-      </ul>
-    ]]></change-notes>
+    <!-- <change-notes> is injected at build time from CHANGELOG.md (see build.gradle.kts). -->
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.database</depends>
