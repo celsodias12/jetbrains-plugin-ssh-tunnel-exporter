@@ -78,7 +78,7 @@ class ExportSshFromToolsAction : AnAction() {
         JBPopupFactory.getInstance()
             .createPopupChooserBuilder(candidates)
             .setTitle("Select Data Source")
-            .setRenderer(SimpleListCellRenderer.create("") { it.name })
+            .setRenderer(SimpleListCellRenderer.create<LocalDataSource> { label, value, _ -> label.text = value?.name ?: "" })
             .setItemChosenCallback { present(project, it) }
             .createPopup()
             .showCenteredInCurrentWindow(project)
