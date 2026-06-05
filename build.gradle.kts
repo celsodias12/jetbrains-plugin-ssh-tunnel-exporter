@@ -1,5 +1,6 @@
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 
 plugins {
     id("java")
@@ -27,13 +28,18 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            sinceBuild = "261"
-            untilBuild = "261.*"
+            sinceBuild = "231"
+            untilBuild = provider { null } // open-ended: compatible with all newer builds
         }
     }
     pluginVerification {
         ides {
-            ide(IntelliJPlatformType.DataGrip, "2026.1.3")
+            ide(IntelliJPlatformType.DataGrip, "2023.1.2") // floor (sinceBuild 231) — verified Compatible
+            select {                                       // newest DataGrip release(s), resolved dynamically each run
+                types = listOf(IntelliJPlatformType.DataGrip)
+                channels = listOf(ProductRelease.Channel.RELEASE)
+                sinceBuild = "261" // current major and up → tracks latest without pinning the patch
+            }
         }
     }
     signing {

@@ -10,8 +10,12 @@ class TunnelTargetMapperTest {
         dbHost: String? = "10.0.0.5", dbPort: Int? = 5432,
         sshHost: String? = "bastion", sshPort: Int = 22, sshUser: String? = "deploy",
         authKind: AuthKind = AuthKind.PASSWORD, keyPath: String? = null,
-        localPort: Int = 0,
-    ) = RawTunnelData("ds1", enabled, dbHost, dbPort, sshHost, sshPort, sshUser, authKind, keyPath, localPort)
+        localPort: Int = 0, sshConfigName: String? = null,
+        dbKind: DbKind = DbKind.OTHER, dbUser: String? = null, dbName: String? = null,
+    ) = RawTunnelData(
+        "ds1", sshConfigName, enabled, dbHost, dbPort, sshHost, sshPort, sshUser,
+        authKind, keyPath, localPort, dbKind, dbUser, dbName,
+    )
 
     @Test fun `disabled tunnel maps to NoTunnel`() {
         assertTrue(TunnelTargetMapper.map(raw(enabled = false)) is ReadResult.NoTunnel)
@@ -24,6 +28,26 @@ class TunnelTargetMapperTest {
         assertEquals("bastion", r.target.sshHost)
         assertEquals("deploy", r.target.sshUser)
         assertEquals(null, r.target.configuredLocalPort)
+    }
+
+    @Test fun `default alias falls back to data source name`() {
+        val r = TunnelTargetMapper.map(raw(sshConfigName = null)) as ReadResult.Ok
+        assertEquals("ds1", r.target.defaultAlias)
+    }
+
+    @Test fun `default alias prefers ssh config name when present`() {
+        val r = TunnelTargetMapper.map(raw(sshConfigName = "prod-bastion")) as ReadResult.Ok
+        assertEquals("prod-bastion", r.target.defaultAlias)
+    }
+
+    @Test fun `db coordinates pass through, blanks nulled`() {
+        val r = TunnelTargetMapper.map(raw(dbKind = DbKind.POSTGRES, dbUser = "app", dbName = "shop")) as ReadResult.Ok
+        assertEquals(DbKind.POSTGRES, r.target.dbKind)
+        assertEquals("app", r.target.dbUser)
+        assertEquals("shop", r.target.dbName)
+        val blank = TunnelTargetMapper.map(raw(dbKind = DbKind.MYSQL, dbUser = "  ", dbName = "")) as ReadResult.Ok
+        assertEquals(null, blank.target.dbUser)
+        assertEquals(null, blank.target.dbName)
     }
 
     @Test fun `keyPath kept only for KEY_PAIR auth`() {

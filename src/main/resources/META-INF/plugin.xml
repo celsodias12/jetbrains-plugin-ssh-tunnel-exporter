@@ -13,8 +13,14 @@
             or use <b>Tools &rarr; Copy SSH Tunnel Command&hellip;</b> to pick one.</li>
         <li>Reads the data source's SSH configuration (host, port, user, key) and the database
             host/port, then builds the command for you.</li>
-        <li>Editable local port; a <b>Run in background</b> checkbox toggles between
-            <code>ssh -N</code> (foreground) and <code>ssh -fN</code> (background); one click to copy.</li>
+        <li>Editable local port and SSH option toggles &mdash; <code>-N</code>, <code>-f</code>,
+            <code>-C</code>, <code>-v</code>, <code>ConnectTimeout</code>, <code>IdentitiesOnly</code>,
+            <code>ExitOnForwardFailure</code> and keep-alive
+            (<code>ServerAliveInterval</code>/<code>ServerAliveCountMax</code>) &mdash; reflected live in the command; one click to copy.</li>
+        <li>Or copy the equivalent <code>~/.ssh/config</code> <code>Host</code> stanza, with an editable host alias
+            (defaults to the SSH configuration name, else the data source name).</li>
+        <li>Shows a small &ldquo;how it works&rdquo; flow picture and, for known DBMS, the matching client command
+            to connect through the tunnel (e.g. <code>psql -h localhost -p 5432</code>).</li>
         <li>Never emits passwords — key-pair auth adds <code>-i &lt;key&gt;</code>; password/agent
             auth is left for ssh to resolve.</li>
       </ul>
@@ -23,6 +29,11 @@
 
     <change-notes><![CDATA[
       <ul>
+        <li><b>0.3.0</b> &mdash; Add SSH option toggles (<code>-N</code>, <code>-f</code>, <code>-C</code>,
+            <code>-v</code>, <code>ConnectTimeout</code>, <code>IdentitiesOnly</code>, <code>ExitOnForwardFailure</code>,
+            and <code>ServerAliveInterval</code>/<code>ServerAliveCountMax</code> keep-alive), one-click copy of the
+            equivalent <code>~/.ssh/config</code> stanza with an editable host alias, a flow diagram, and a
+            copyable native-client connect command for known DBMS.</li>
         <li><b>0.1.0</b> &mdash; Initial release: generate and copy the <code>ssh -L</code> tunnel
             command for a data source, from the Database tool window or the Tools menu, with a
             foreground/background toggle and an editable local port.</li>

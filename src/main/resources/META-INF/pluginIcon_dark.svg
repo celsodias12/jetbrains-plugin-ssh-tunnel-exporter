@@ -1,0 +1,23 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4A8BFF"/>
+      <stop offset="1" stop-color="#1ECFB8"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="38" height="38" rx="9" fill="url(#bg)"/>
+
+  <!-- database -->
+  <rect x="9" y="11" width="18" height="15.2" fill="#FFFFFF"/>
+  <ellipse cx="18" cy="26.2" rx="9" ry="3" fill="#FFFFFF"/>
+  <ellipse cx="18" cy="11" rx="9" ry="3" fill="#E8F0FF"/>
+  <path d="M9 16.5 a9 3 0 0 0 18 0" stroke="#A7C6F5" stroke-width="1" fill="none"/>
+  <path d="M9 21.2 a9 3 0 0 0 18 0" stroke="#A7C6F5" stroke-width="1" fill="none"/>
+
+  <!-- secure (ssh) badge -->
+  <circle cx="28.6" cy="28.6" r="7" fill="#0E2742"/>
+  <path d="M26.3 27.3 v-1.3 a2.3 2.3 0 0 1 4.6 0 v1.3" stroke="#FFFFFF" stroke-width="1.3" fill="none"/>
+  <rect x="25.4" y="27.1" width="6.4" height="4.7" rx="1.1" fill="#FFFFFF"/>
+  <circle cx="28.6" cy="29.1" r="0.75" fill="#0E2742"/>
+  <rect x="28.2" y="29.3" width="0.8" height="1.7" rx="0.4" fill="#0E2742"/>
+</svg>

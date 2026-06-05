@@ -1,11 +1,13 @@
 package dev.sshtunnelexporter.datagrip.read
 
+import com.intellij.database.Dbms
 import com.intellij.database.dataSource.LocalDataSource
 import com.intellij.database.dataSource.url.JdbcUrlParserUtil
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.remote.AuthType
 import dev.sshtunnelexporter.datagrip.model.AuthKind
+import dev.sshtunnelexporter.datagrip.model.DbKind
 import dev.sshtunnelexporter.datagrip.model.RawTunnelData
 import dev.sshtunnelexporter.datagrip.model.ReadResult
 import dev.sshtunnelexporter.datagrip.model.TunnelTargetMapper
@@ -29,9 +31,10 @@ class DataSourceReader(private val project: Project) {
         val tunnel = lds.sshConfiguration
         val enabled = tunnel != null && tunnel.isEnabled && !tunnel.isEmpty
         val ssh = if (enabled) tunnel!!.getSshConfig(project) else null
-        val (dbHost, dbPort) = extractDbHostPort(lds)
+        val (dbHost, dbPort, dbName) = extractDbCoords(lds)
         return RawTunnelData(
             dsName = lds.name,
+            sshConfigName = ssh?.customName?.takeIf { it.isNotBlank() },
             tunnelEnabled = enabled,
             dbHost = dbHost,
             dbPort = dbPort,
@@ -41,16 +44,23 @@ class DataSourceReader(private val project: Project) {
             authKind = ssh?.authType.toAuthKind(),
             keyPath = ssh?.keyPath,
             configuredLocalPort = tunnel?.localPort ?: 0,
+            dbKind = lds.dbKind(),
+            dbUser = lds.username?.takeIf { it.isNotBlank() },
+            dbName = dbName,
         )
     }
 
-    /** Reads DB host/port from the parsed JDBC URL via DataGrip's own driver-aware parser. */
-    private fun extractDbHostPort(lds: LocalDataSource): Pair<String?, Int?> {
-        val cfg = lds.connectionConfig ?: return null to null
-        val parser = JdbcUrlParserUtil.parsed(cfg) ?: return null to null
+    /** Reads DB host/port/database from the parsed JDBC URL via DataGrip's own driver-aware parser. */
+    private fun extractDbCoords(lds: LocalDataSource): Triple<String?, Int?, String?> {
+        val cfg = lds.connectionConfig ?: return Triple(null, null, null)
+        val parser = JdbcUrlParserUtil.parsed(cfg) ?: return Triple(null, null, null)
         val host = parser.getParameter("host")?.takeIf { it.isNotBlank() }
         val port = parser.getParameter("port")?.toIntOrNull()
-        return host to port
+        val db = (parser.getParameter("database")
+            ?: parser.getParameter("databaseName")
+            ?: parser.getParameter("path")?.removePrefix("/"))
+            ?.takeIf { it.isNotBlank() }
+        return Triple(host, port, db)
     }
 
     private companion object {
@@ -63,4 +73,18 @@ private fun AuthType?.toAuthKind(): AuthKind = when (this) {
     AuthType.KEY_PAIR -> AuthKind.KEY_PAIR
     AuthType.OPEN_SSH -> AuthKind.OPEN_SSH
     null -> AuthKind.OTHER
+}
+
+/** Reduce DataGrip's [Dbms] to the connect-CLI families we know how to render. */
+private fun LocalDataSource.dbKind(): DbKind {
+    val d = dbms ?: return DbKind.OTHER
+    return when {
+        d.isPostgres || d == Dbms.GREENPLUM || d == Dbms.REDSHIFT || d == Dbms.COCKROACH -> DbKind.POSTGRES
+        d.isMysql || d == Dbms.MARIA || d == Dbms.MYSQL_AURORA || d == Dbms.MEMSQL -> DbKind.MYSQL
+        d == Dbms.MSSQL || d == Dbms.MSSQL_LOCALDB || d == Dbms.AZURE || d == Dbms.SYNAPSE -> DbKind.MSSQL
+        d.isOracle -> DbKind.ORACLE
+        d == Dbms.MONGO -> DbKind.MONGO
+        d.isClickHouse -> DbKind.CLICKHOUSE
+        else -> DbKind.OTHER
+    }
 }
