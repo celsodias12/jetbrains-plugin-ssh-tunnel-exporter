@@ -1,0 +1,28 @@
+# Gradle
+.gradle/
+build/
+
+# IntelliJ Platform Gradle Plugin (generated artifacts/metadata)
+.intellijPlatform/
+
+# Kotlin compiler scratch
+.kotlin/
+
+# IntelliJ / IDE
+.idea/
+*.iml
+out/
+
+# Plugin signing secrets — NEVER commit these
+secrets/
+*.pem
+chain.crt
+*.p12
+.env
+
+# Markdown — ignore all .md except README.md (covers docs/, PUBLISHING.md, etc.)
+*.md
+!README.md
+
+# OS
+.DS_Store

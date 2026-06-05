@@ -1,0 +1,53 @@
+<idea-plugin>
+    <id>io.github.celsodias.ssh-tunnel-exporter</id>
+    <name>SSH Tunnel Exporter</name>
+
+    <vendor url="https://github.com/celsodias12">Celso Dias</vendor>
+
+    <description><![CDATA[
+      <p>Generates the standalone <code>ssh -L</code> port-forwarding command for any data source
+      that is configured with an <b>SSH tunnel</b> — so you can open the exact same bridge
+      <em>outside</em> the IDE (for <code>psql</code>, <code>mysql</code>, a dump tool, or anything else).</p>
+      <ul>
+        <li>Right-click a data source in the <b>Database</b> tool window &rarr; <b>Copy SSH Tunnel Command</b>,
+            or use <b>Tools &rarr; Copy SSH Tunnel Command&hellip;</b> to pick one.</li>
+        <li>Reads the data source's SSH configuration (host, port, user, key) and the database
+            host/port, then builds the command for you.</li>
+        <li>Editable local port; a <b>Run in background</b> checkbox toggles between
+            <code>ssh -N</code> (foreground) and <code>ssh -fN</code> (background); one click to copy.</li>
+        <li>Never emits passwords — key-pair auth adds <code>-i &lt;key&gt;</code>; password/agent
+            auth is left for ssh to resolve.</li>
+      </ul>
+      <p>Works in DataGrip (and other JetBrains IDEs with the Database Tools &amp; SQL plugin).</p>
+    ]]></description>
+
+    <change-notes><![CDATA[
+      <ul>
+        <li><b>0.1.0</b> &mdash; Initial release: generate and copy the <code>ssh -L</code> tunnel
+            command for a data source, from the Database tool window or the Tools menu, with a
+            foreground/background toggle and an editable local port.</li>
+      </ul>
+    ]]></change-notes>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.database</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="SSH Tunnel Exporter" displayType="BALLOON"/>
+    </extensions>
+
+    <actions>
+        <action id="dev.sshtunnelexporter.ExportSshFromDbView"
+                class="dev.sshtunnelexporter.datagrip.action.ExportSshFromDbViewAction"
+                text="Copy SSH Tunnel Command"
+                description="Generate the ssh -L command for this data source's SSH tunnel">
+            <add-to-group group-id="DatabaseViewPopupMenu" anchor="last"/>
+        </action>
+        <action id="dev.sshtunnelexporter.ExportSshFromTools"
+                class="dev.sshtunnelexporter.datagrip.action.ExportSshFromToolsAction"
+                text="Copy SSH Tunnel Command..."
+                description="Pick a data source and generate its ssh -L command">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
